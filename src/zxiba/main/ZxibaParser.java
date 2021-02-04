@@ -5,105 +5,106 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 
-//basic parser
-public class ZxibaParser {
-	private List<String> allArgs;
-	private LinkedList<ZxibaKeyword> keywords=null;
-	private LinkedList<String> keywordNames = null;
-	private HashMap<String,int[]> startEnds;// {keywordName =>[startIndex , endIndex]
+import zxiba.exceptions.ParameterCountNotInRangeException;
+
+//抽象Parser，定義共通行為
+//這個系列一律建議先檢查再取值(但取值也可同時檢查)
+public abstract class ZxibaParser {
+	protected List<String> allParams;
+	protected HashMap<String,int[]> startEnds;// {keywordName =>[startIndex , endIndex] ， 將結果儲存起來，接下來有需要的時候直接使用
 	
+	protected abstract String addPrefix(String keyName);	//將沒有任何前綴的名稱format成符合當下需求的樣子，如 abc => -opt 或 --opt
+	protected abstract boolean isKey(String param); //是否是當下認定的 pattern key
 	
-	/*
-	 * @comment 直接用當下的資源產生一個Parser，Keyword跟Option可以稍後再設定
-	 * */
+	public abstract String[] getParamValues(String patternKey);//不論數量，有多少取多少
+	
+	public abstract String[] getParamValues(String patternKey,int valueCount,int range);//參數數量必須 介於value_count 跟 value_count + range，數量不合時回傳null
+
+	
 	public ZxibaParser(String[] args) {
-		allArgs = Arrays.asList(args);
-		keywordNames = new LinkedList<String>();
+		allParams = Arrays.asList(args);
 		startEnds= new HashMap<String,int[]>();
 	}
 	
-	/*
-	 * 產生一個未初始化的ZxibaParser
-	 * 
-	 * */
-	public ZxibaParser() {}
+	
+	protected boolean isKeyOrSeparator(String param) {
+		return isSeparator(param) || isKey(param);
+	}
 	
 	
-	//詢問一個複雜狀況
-	// 存在keyword 名稱
-	// 必須含有傳入的所有參數
-	public boolean hasPattern(String keyword, String... optionsExisted) {
-		int startIndex;
-		int[] startAndEnd;
-		startIndex=keywordIndex(keyword);
+	//是否是是分隔符號 "--"
+	protected boolean isSeparator(String param) {
+		return param.trim().equals("--");
+	};
+	//是否有此option存在，不理會參數數量限制
+	public boolean hasKey(String keyName) throws ParameterCountNotInRangeException{
+		return hasKeyWithParam(keyName,-1,0);
+	}
+	
+	
+	 /* 檢查是否帶有指定keyword以及 value_count ~value_count + range 數量的 value，value_count
+	 * value_count 與 range 均為0的時候表示此keyword 不接受任何參數
+	 * 主要用來處理0 - n 個參數的狀況
+	 * value_count 為 -1的時候表示參數數量沒有限制
+	 * 未傳入range時傳入之參數數量必須與value_count相同
+	 * value_count=-1 的時候沒有限制參數數量
+	 * 注意 value_count==-1 時 range 會被無視
+	 * 超出範圍時
+	 * */ 
+	public boolean hasKeyWithParam(String keyName,int valueCount,int range) throws ParameterCountNotInRangeException{
+		int start,end,pValueCount;
 		
-		if(!startEnds.containsKey(keyword)&&startIndex==-1){return false;}
-		startAndEnd = startEnds.get(keyword);
+		if(startEnds.containsKey(keyName)){return startEnds.get(keyName)!=null;}
+		start = getOptStart(addPrefix(keyName));
+		if(valueCount<0 ) {return start!=-1 ;}
+		end= getOptEndIndex(start);
+		startEnds.put(keyName,null);
 		
-		if(startAndEnd==null) {
-			startAndEnd = new int[] {startIndex,getEndIndex(startIndex)};
-			startEnds.put(keyword,startAndEnd);
+		if(valueCount==0 && range==0 && end!=start){
+			System.err.println(String.format("Incorrect number of parameters , require 0 , received %d", end-start));
+			throw new ParameterCountNotInRangeException();
 		}
-		for(int x= 0 ; x < optionsExisted.length;x++) {
-			optionsExisted[x]="--"+optionsExisted[x];
+		
+		
+		if((pValueCount=end-start) != valueCount  && range==0 ) {
+			System.err.println(
+					String.format("Incorrect number of parameters , require %d , received %d"
+					, valueCount
+					, pValueCount));
+			throw new ParameterCountNotInRangeException();
 		}
-		//考慮自己寫個findInRange來處理，目前先這樣就好。
-		return allArgs.
-				subList(startAndEnd[0], startAndEnd[1]).
-				containsAll(Arrays.asList(optionsExisted));
-	}
-	//檢查是否含有指定的keyword並且帶有指定數量的參數，以及含有傳入的變數
-	public boolean hasPattern(String keyword,int valueCount,String... options) {
 		
-		return false;
-	}
-	
-	private int getValueCount(String keywordName) {
-		
-		return -1;
-	}
-		
-	//前娺 "-" , ex : -msg
-	private boolean isKeyword(String keywordName) {
-		return false;
-	}
-	
-	//放在keyword後面並且沒有任何前娺
-	private boolean isValue(String arg) {
-		return false;
-	}
-	
-	//放在 keyword 後面並且前墜"--"
-	public boolean isOption(String arg) {
-		return false;
-	}
-	
-	
-	
-	
-	
-	/*
-	 * keyword : 加前綴 "-"
-	 * Option : 必須在keyword之後，並且加前綴 "--"
-	 * */
-	//要符合keyword的規格
-	private int keywordIndex(String keywordName) {return allArgs.indexOf("-"+keywordName);}
-	
-	public boolean hasKeyword(String keywordName) {return keywordIndex(keywordName)==-1;}
-	
-	private int getEndIndex(int startIndex) {
-		int endIndex = startIndex;
-		for(endIndex=startIndex+1;endIndex<allArgs.size();endIndex++) {
-			if(allArgs.get(endIndex).matches("Keyword pattern")) {break;}
+		//負數的話先做一次轉換確保下面的邏輯是正確的
+		range = range < 0 ? range*-1 : range;
+		if( (valueCount-range) < pValueCount || pValueCount > (valueCount+range)) {
+			System.err.println(
+					String.format("Incorrect number of parameters , maximum %d  minimum %d , received %d"
+							, valueCount-range
+							,valueCount+range
+							, pValueCount));
+			throw new ParameterCountNotInRangeException();
 		}
+		startEnds.put(keyName, new int[] {start,end});
+		return true;
+		
+	}
+	
+	private int getEndIndex(String keyName) {
+		return getOptEndIndex(getOptStart(keyName));
+	}
+	
+	private int getOptEndIndex(int startIndex) {
+		 // 找到下一個 option 或是 --
+		int endIndex;
+		for(endIndex = startIndex+1 ;!isKeyOrSeparator(allParams.get(endIndex)) ;endIndex++);
 		return endIndex;
-		
 	}
 	
-	//有傳入結構時直接處理
-	public void parse() {
-		
+	protected int getOptStart(String keyName) {
+		return allParams.indexOf(keyName);
 	}
 	
+	
+
 	
 }
