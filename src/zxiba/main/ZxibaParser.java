@@ -37,7 +37,7 @@ public abstract class ZxibaParser {
 		return param.trim().equals("--");
 	};
 	//是否有此option存在，不理會參數數量限制
-	public boolean hasKey(String keyName) throws ParameterCountNotInRangeException{
+	public boolean hasKey(String keyName) {
 		return hasKeyWithParam(keyName,-1,0);
 	}
 	
@@ -51,7 +51,7 @@ public abstract class ZxibaParser {
 	 * 注意 value_count==-1 時 range 會被無視
 	 * 超出範圍時
 	 * */ 
-	public boolean hasKeyWithParam(String keyName,int valueCount,int range) throws ParameterCountNotInRangeException{
+	public boolean hasKeyWithParam(String keyName,int valueCount,int range) {
 		int start,end,pValueCount;
 		
 		if(startEnds.containsKey(keyName)){return startEnds.get(keyName)!=null;}
@@ -62,7 +62,7 @@ public abstract class ZxibaParser {
 		
 		if(valueCount==0 && range==0 && end!=start){
 			System.err.println(String.format("Incorrect number of parameters , require 0 , received %d", end-start));
-			throw new ParameterCountNotInRangeException();
+			return false;
 		}
 		
 		
@@ -71,7 +71,7 @@ public abstract class ZxibaParser {
 					String.format("Incorrect number of parameters , require %d , received %d"
 					, valueCount
 					, pValueCount));
-			throw new ParameterCountNotInRangeException();
+			return false;
 		}
 		
 		//負數的話先做一次轉換確保下面的邏輯是正確的
@@ -82,18 +82,32 @@ public abstract class ZxibaParser {
 							, valueCount-range
 							,valueCount+range
 							, pValueCount));
-			throw new ParameterCountNotInRangeException();
+			return false;
 		}
 		startEnds.put(keyName, new int[] {start,end});
 		return true;
 		
 	}
 	
-	private int getEndIndex(String keyName) {
+	protected int[] getStartEnd(String patternKey) {
+		int[] startEnd;
+		if(startEnds.containsKey(patternKey)) {
+			startEnd=startEnds.get(patternKey);
+		}else
+		{
+			startEnd=new int[] {
+					getOptStart(addPrefix(patternKey))
+					,getEndIndex(addPrefix(patternKey))
+					};	
+		}
+		return startEnd;
+	}
+	
+	protected int getEndIndex(String keyName) {
 		return getOptEndIndex(getOptStart(keyName));
 	}
 	
-	private int getOptEndIndex(int startIndex) {
+	protected int getOptEndIndex(int startIndex) {
 		 // 找到下一個 option 或是 --
 		int endIndex;
 		for(endIndex = startIndex+1 ;!isKeyOrSeparator(allParams.get(endIndex)) ;endIndex++);

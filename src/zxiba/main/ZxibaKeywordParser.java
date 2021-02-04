@@ -14,7 +14,7 @@ import zxiba.exceptions.ParameterCountNotInRangeException;
  * 會將keyword視為帶有一個 "-"符號的value
  * 沒有hasPattern
  * */
-public  class ZxibaKeywordParser extends ZxibaParser {
+public  class ZxibaKeywordParser extends ZxibaOptionParser {
 
 	public ZxibaKeywordParser(String[] args) {
 		super(args);
@@ -33,18 +33,6 @@ public  class ZxibaKeywordParser extends ZxibaParser {
 		param.trim().matches("-{1}*");
 		return false;
 	}
-
-	@Override
-	public String[] getParamValues(String patternKey) {
-		
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public String[] getParamValues(String patternKey, int valueCount, int range) {
-		// TODO Auto-generated method stub
-		return null;
-	}
+	
 
 }
