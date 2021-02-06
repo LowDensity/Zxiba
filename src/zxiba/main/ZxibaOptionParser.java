@@ -2,7 +2,7 @@ package zxiba.main;
 
 import java.util.List;
 
-public class ZxibaOptionParser extends ZxibaParser {
+public class ZxibaOptionParser extends ZxibaAbstractParser {
 
 	public ZxibaOptionParser(String[] args) {
 		super(args);
@@ -15,7 +15,7 @@ public class ZxibaOptionParser extends ZxibaParser {
 
 	@Override
 	protected boolean isKey(String param) {
-		return param.matches("--");//--opt ，opt = 前面加兩個減號
+		return param.trim().matches("(\\s|^)-{2}[\\w]+") ;//--opt ，opt = 前面加兩個減號
 	}
 
 	@Override

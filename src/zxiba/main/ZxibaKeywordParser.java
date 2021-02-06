@@ -29,9 +29,9 @@ public  class ZxibaKeywordParser extends ZxibaOptionParser {
 
 	@Override
 	protected boolean isKey(String param) {
-		// keyWord : 前面有一個 "-"號，--事option
-		param.trim().matches("-{1}*");
-		return false;
+		// 是 keyword但〝不是Option的keyword
+		// keyWord : 前面有一個 "-"號
+		return param.trim().matches("(\\s|^)-{1}[\\w]") && !super.isKey(param);
 	}
 	
 
