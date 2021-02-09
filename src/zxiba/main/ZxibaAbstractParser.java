@@ -18,8 +18,16 @@ public abstract class ZxibaAbstractParser {
 
 	
 	public ZxibaAbstractParser(String[] args) {
-		allParams = Arrays.asList(args);
-		startEnds= new HashMap<String,int[]>();
+		this(Arrays.asList(args)); 
+	}
+	
+	public ZxibaAbstractParser(List<String> args) {
+		allParams = args;
+		startEnds=new HashMap<String,int[]>();
+	}
+	
+	public ZxibaAbstractParser(List<String> args,String... parseKeyNames) {
+		this(args);
 	}
 	
 	
@@ -108,7 +116,7 @@ public abstract class ZxibaAbstractParser {
 	protected int getOptEndIndex(int startIndex) {
 		 // 找到下一個 option 或是 --
 		int endIndex;
-		for(endIndex = startIndex+1 ;!isKeyOrSeparator(allParams.get(endIndex)) ;endIndex++);
+		for(endIndex = startIndex+1 ;endIndex < allParams.size() && !isKeyOrSeparator(allParams.get(endIndex)) ;endIndex++);
 		return endIndex;
 	}
 	
