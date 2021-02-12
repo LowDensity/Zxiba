@@ -1,47 +1,45 @@
 package zxiba.main;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 public class ZxibaOptionParser extends ZxibaAbstractParser {
-
-	public ZxibaOptionParser(String[] args) {
-		super(args);
+	
+	protected HashMap<String,int[]> startEnds;
+	protected String keyName = "";// 如果沒有設定，就無法使用
+	public ZxibaOptionParser(String[] args ,String keyName) {
+		super(args,keyName);
 	}
+
+	public ZxibaOptionParser(List<String> args ,String keyName) {
+		super(args,keyName);
+	}
+	
 
 	@Override
 	protected String addPrefix(String keyName) {
-		return isKey(keyName) ? keyName : "--"+keyName;
+		return isOption(keyName) ? keyName : "--"+keyName;
 	}
 
-	@Override
-	protected boolean isKey(String param) {
+	protected boolean isOption(String param) {
 		return param.trim().matches("(\\s|^)-{2}[\\w]+") ;//--opt ，opt = 前面加兩個減號
 	}
+	
+	protected boolean isKeyOrSeparator(String param) {
+		return isSeparator(param) || isOption(param);
+	}
+
+	
 
 	@Override
 	public String[] getParamValues(String patternKey) {
-		int[] startEnd;
-		int start,end;
-		startEnd=getStartEnd(patternKey);
-		start=startEnd[0];
-		end=startEnd[1];
-		return allParams.subList(start, end+1).toArray(new String[end-start]);
+		// TODO Auto-generated method stub
+		return null;
 	}
 
-	//取值的時候同時檢查是否符合要求的數量
-	@Override
-	public String[] getParamValues(String patternKey, int valueCount, int range) {
-		if(!hasKeyWithParam(patternKey,valueCount,range)) {return new String[0];}
-		return getParamValues(patternKey);
-	}
-	
 
 
-
-
-
-	
-		
 		
 	
 }

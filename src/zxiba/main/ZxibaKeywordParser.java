@@ -15,24 +15,52 @@ import zxiba.exceptions.ParameterCountNotInRangeException;
  * 沒有hasPattern
  * */
 public  class ZxibaKeywordParser extends ZxibaOptionParser {
-
-	public ZxibaKeywordParser(String[] args) {
-		super(args);
+	
+	private HashMap<String,ZxibaOptionParser> options=new HashMap<String,ZxibaOptionParser>();
+	
+	public ZxibaKeywordParser(String[] args,String keyName) {
+		super(args,keyName);
 		// TODO Auto-generated constructor stub
 	}
+	
+	public ZxibaKeywordParser(List<String> args,String keyName) {
+		super(args,keyName);
+		// TODO Auto-generated constructor stub
+	}
+	
+	
+	
+
 
 	@Override
 	protected String addPrefix(String keyName) {
 		return isKey(keyName) ? keyName : "-"+keyName;
 	}
 	
+	protected boolean isKeyOrSeparator(String param) {
+		return isSeparator(param) || isKey(param);
+	}
 
-	@Override
 	protected boolean isKey(String param) {
 		// 是 keyword但〝不是Option的keyword
 		// keyWord : 前面有一個 "-"號
-		return param.trim().matches("(\\s|^)-{1}[\\w]") && !super.isKey(param);
+		return param.trim().matches("(\\s|^)-{1}[\\w]");
 	}
+
+	//檢查是否帶有指定的option
+	public boolean hasOptions(String[] optNames) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+	
+	public ZxibaOptionParser getOption(String optName) {
+		ZxibaOptionParser optParser;
+		optParser =  !options.containsKey(optName) ? new ZxibaOptionParser(allParams,optName) : options.get(optName);
+		return optParser;
+	}
+	
+
+	
 	
 
 }
