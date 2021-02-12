@@ -1,5 +1,6 @@
 package zxiba.main;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -28,10 +29,6 @@ public  class ZxibaKeywordParser extends ZxibaOptionParser {
 		// TODO Auto-generated constructor stub
 	}
 	
-	
-	
-
-
 	@Override
 	protected String addPrefix(String keyName) {
 		return isKey(keyName) ? keyName : "-"+keyName;
@@ -50,12 +47,29 @@ public  class ZxibaKeywordParser extends ZxibaOptionParser {
 	//檢查是否帶有指定的option
 	public boolean hasOptions(String[] optNames) {
 		// TODO Auto-generated method stub
-		return false;
+		ArrayList<String> missingOpts=new ArrayList<String>(8);
+		for(int oi =0 ; oi <optNames.length;oi++) {
+			String optName=optNames[oi];
+			if(!getOption(optName).containsKeyName) {
+				missingOpts.add(optName);
+			}
+			
+		}
+		if(missingOpts.size()!=0) {
+			System.err.print(String.format(
+					"Missing Parameter %s", String.join(",", missingOpts))
+					);
+			return false;
+		}
+		return true;
 	}
 	
 	public ZxibaOptionParser getOption(String optName) {
 		ZxibaOptionParser optParser;
-		optParser =  !options.containsKey(optName) ? new ZxibaOptionParser(allParams,optName) : options.get(optName);
+		if(!options.containsKey(optName)) {
+			 options.put(optName,new ZxibaOptionParser(allParams,optName));
+		 }
+		optParser = options.get(optName);
 		return optParser;
 	}
 	

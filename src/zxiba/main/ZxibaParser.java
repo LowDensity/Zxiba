@@ -44,12 +44,12 @@ public class ZxibaParser extends ZxibaKeywordParser{
 	public boolean hasKeyWithOptions(String keyName,String... optNames) {
 		ZxibaKeywordParser keyword;
 		keyword = keywords.containsKey(keyName) ? keywords.get(keyName) : new ZxibaKeywordParser(allParams,keyName);
-		if(!keyword.containsKeyName) {return false;}
-		return keyword.hasOptions(optNames);
+		keywords.put(keyName,keyword);
+		return keyword.containsKeyName && keyword.hasOptions(optNames);
 	}
 	
 	//直接取得keyword底下的option的值
-	public String[] getKeywordOption(String keyName,String optName) {
+	public String[] getOptionValue(String keyName,String optName) {
 		ZxibaKeywordParser keyword;
 		keyword = keywords.containsKey(keyName) ? keywords.get(keyName) : new ZxibaKeywordParser(allParams,keyName);
 		return keyword.getOption(optName).getValues();
@@ -62,7 +62,11 @@ public class ZxibaParser extends ZxibaKeywordParser{
 		return keyword.getValues();
 	}
 	
-	
+	public String getKeywordValue(String keyName) {
+		ZxibaKeywordParser keyword;
+		keyword = keywords.containsKey(keyName) ? keywords.get(keyName) : new ZxibaKeywordParser(allParams,keyName);
+		return keyword.getValue();
+	}	
 	
 	
 	

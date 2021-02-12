@@ -26,6 +26,7 @@ public abstract class ZxibaAbstractParser {
 		allParams = args;
 		start = getOptStartIndex(addPrefix(keyName));
 		end = getOptEndIndex(start);
+		containsKeyName = start !=-1 &&  end !=-1 ;
 	}
 	
 	
@@ -38,6 +39,11 @@ public abstract class ZxibaAbstractParser {
 		if(!containsKeyName) {return new String[0];}
 		//去掉頭
 		return allParams.subList(start+1, end).toArray(new String[end-start-1]);
+	}
+	
+	//直接取值，如果不是單一值，串成一串回傳
+	public String getValue() {
+		return String.join(",", getValues());
 	}
 	
 	//取值同時檢查數量
