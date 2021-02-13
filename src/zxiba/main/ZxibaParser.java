@@ -1,11 +1,7 @@
 package zxiba.main;
 
-import java.util.Arrays;
 import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
 
-import zxiba.exceptions.ParameterCountNotInRangeException;
 
 
 /*
@@ -42,30 +38,26 @@ public class ZxibaParser extends ZxibaKeywordParser{
 	
 	//檢查是否帶有指定的keyWord以及required parameter(option)
 	public boolean hasKeyWithOptions(String keyName,String... optNames) {
-		ZxibaKeywordParser keyword;
-		keyword = keywords.containsKey(keyName) ? keywords.get(keyName) : new ZxibaKeywordParser(allParams,keyName);
-		keywords.put(keyName,keyword);
+		ZxibaKeywordParser keyword= getAndParseKeyword(keyName);
 		return keyword.containsKeyName && keyword.hasOptions(optNames);
 	}
 	
+	private ZxibaKeywordParser getAndParseKeyword(String keyName) {
+		return getAndParseKeyword(keyName);
+	}
+	
 	//直接取得keyword底下的option的值
-	public String[] getOptionValue(String keyName,String optName) {
-		ZxibaKeywordParser keyword;
-		keyword = keywords.containsKey(keyName) ? keywords.get(keyName) : new ZxibaKeywordParser(allParams,keyName);
-		return keyword.getOption(optName).getValues();
+	public String getOptionValue(String keyName,String optName) {
+		return getAndParseKeyword(keyName).getOption(optName).getValue();
 	}
 	
 	//直接取Keyword底下的值
 	public String[] getKeywordValues(String keyName) {
-		ZxibaKeywordParser keyword;
-		keyword = keywords.containsKey(keyName) ? keywords.get(keyName) : new ZxibaKeywordParser(allParams,keyName);
-		return keyword.getValues();
+		return getAndParseKeyword(keyName).getValues();
 	}
 	
 	public String getKeywordValue(String keyName) {
-		ZxibaKeywordParser keyword;
-		keyword = keywords.containsKey(keyName) ? keywords.get(keyName) : new ZxibaKeywordParser(allParams,keyName);
-		return keyword.getValue();
+		return getAndParseKeyword(keyName).getValue();
 	}	
 	
 	

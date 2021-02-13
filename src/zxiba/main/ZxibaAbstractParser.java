@@ -1,14 +1,12 @@
 package zxiba.main;
 
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 //抽象Parser，定義共通行為
 //這個系列一律建議先檢查再取值(但取值也可同時檢查)
 public abstract class ZxibaAbstractParser {
 	protected List<String> allParams;
 	protected boolean containsKeyName = false;
-	private String keyName;
 	private int start;
 	private int end;
 	protected abstract String addPrefix(String keyName);	//將沒有任何前綴的名稱format成符合當下需求的樣子，如 abc => -opt 或 --opt
@@ -22,7 +20,6 @@ public abstract class ZxibaAbstractParser {
 	public ZxibaAbstractParser(List<String> args,String keyName) {
 		start =-1;
 		end = -1;
-		this.keyName=keyName;
 		allParams = args;
 		start = getOptStartIndex(addPrefix(keyName));
 		end = getOptEndIndex(start);

@@ -1,12 +1,8 @@
 package zxiba.main;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
-
-import zxiba.exceptions.ParameterCountNotInRangeException;
 
 /*直接在此處實作公用方法
  * 
@@ -35,7 +31,7 @@ public  class ZxibaKeywordParser extends ZxibaOptionParser {
 	}
 	
 	protected boolean isKeyOrSeparator(String param) {
-		return isSeparator(param) || isKey(param);
+		return isSeparator(param) || isKey(param) || isOption(param);
 	}
 
 	protected boolean isKey(String param) {
